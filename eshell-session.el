@@ -1,11 +1,13 @@
 ;;; eshell-session.el -*- lexical-binding: t -*-
 
 (defvar eshell-session:session-list nil)
+(defcustom eshell-session:buffer-name eshell-buffer-name
+  "default basename for buffer name")
 
 ;;;; funcs
 
 (cl-defun eshell-session:default-buffer-name-p (name)
-  (cl-equalp eshell-buffer-name name))
+  (cl-equalp eshell-session:buffer-name name))
 
 (cl-defun eshell-session:mode-p (mode)
   (string-equal "eshell-mode" mode))
@@ -18,34 +20,35 @@
 (cl-defun eshell-session:buffer-name-next (name)
   (cond
    ((not name)
-    eshell-buffer-name)
+    eshell-session:buffer-name)
    ((eshell-session:default-buffer-name-p name)
-    "*eshell*<1>"    )
+    (cl-concatenate 'string
+                    eshell-session:buffer-name "<1>"))
    (t
     (cl-letf* ((num-char (eshell-session:buffer-number name))
                (next-num-char (number-to-string (+ 1 (string-to-int num-char)))))
-      (format "%s<%s>" eshell-buffer-name
+      (format "%s<%s>" eshell-session:buffer-name
               next-num-char)))))
 
 (cl-defun eshell-session:buffer-name-prev (name)
   (cond
    ((not name)
-    eshell-buffer-name)
+    eshell-session:buffer-name)
    ((eshell-session:default-buffer-name-p name)
     (eshell-session:buffer-last))
    (t
     (cl-letf ((num-char (eshell-session:buffer-number name)))
       (if (cl-equalp num-char "1")
-          eshell-buffer-name
+          eshell-session:buffer-name
         (cl-letf ((prev-num-char (number-to-string (- (string-to-int num-char) 1))))
-          (format "%s<%s>" eshell-buffer-name prev-num-char)))))))
+          (format "%s<%s>" eshell-session:buffer-name prev-num-char)))))))
 
 (cl-defun eshell-session:find-next (name)
   (cond
    ((cl-find (eshell-session:buffer-name-next name) eshell-session:session-list)
     (eshell-session:buffer-name-next name))
    (t
-    eshell-buffer-name)))
+    eshell-session:buffer-name)))
 
 (cl-defun eshell-session:buffer-number (name)
   (cond ((eshell-session:default-buffer-name-p name)
@@ -74,13 +77,13 @@
   "Bring up a full-screen eshell or restore previous config."
   (interactive)
   (if (eshell-session:mode-p major-mode)
-      (jump-to-register :my-eshell)
-    (progn
-      (window-configuration-to-register :my-eshell)
-      (if (not eshell-session:session-list)
-          (setq eshell-session:session-list `(,eshell-buffer-name)))
-      (eshell)
-      (delete-other-windows))))
+      (jump-to-register :eshell-session-winconf)
+    (window-configuration-to-register :eshell-session-winconf)
+    (setq eshell-buffer-name eshell-session:buffer-name)
+    (if (not eshell-session:session-list)
+        (setq eshell-session:session-list `(,eshell-session:buffer-name)))
+    (eshell)
+    (delete-other-windows)))
 
 (cl-defun eshell-session:next ()
   "jump to next eshell buffer"
@@ -89,7 +92,7 @@
       (let ((next (eshell-session:buffer-name-next (buffer-name (current-buffer)))))
         (if (eshell-session:buffer-exists next)
             (switch-to-buffer next)
-          (switch-to-buffer eshell-buffer-name)))
+          (switch-to-buffer eshell-session:buffer-name)))
     (message "Not eshell buffer")))
 
 (cl-defun eshell-session:prev ()
@@ -98,7 +101,7 @@
       (cl-letf ((prev (eshell-session:buffer-name-prev (buffer-name (current-buffer)))))
         (if (eshell-session:buffer-exists prev)
             (switch-to-buffer prev)
-          (switch-to-buffer eshell-buffer-name)))
+          (switch-to-buffer eshell-session:buffer-name)))
     (message "not eshell buffer")))
 
 (cl-defun eshell-session:new ()
