@@ -17,7 +17,7 @@
 
 (cl-defun eshell-session:make-buffer-name (name suffix)
   (if (cl-equalp "*" (cl-subseq name -1))
-      (cl-letf ((name-but-last (cl-subseq name 0 (- (length name) 1))))
+      (cl-letf ((name-but-last (string-remove-suffix "*" name)))
         (format "%s %s*" name-but-last suffix))
     (format "%s %s" name suffix)))
 
