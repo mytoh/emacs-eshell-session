@@ -1,5 +1,8 @@
 ;;; eshell-session.el -*- lexical-binding: t -*-
 
+(require 'cl-lib)
+(require 'subr-x)
+
 (defvar eshell-session:session-list nil)
 (defcustom eshell-session:buffer-name eshell-buffer-name
   "default basename for buffer name")
