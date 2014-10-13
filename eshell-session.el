@@ -12,6 +12,12 @@
 (cl-defun eshell-session:mode-p (mode)
   (string-equal "eshell-mode" mode))
 
+(cl-defun eshell-session:make-buffer-name (name suffix)
+  (if (cl-equalp "*" (cl-subseq name -1))
+      (cl-letf ((name-but-last (cl-subseq name 0 (- (length name) 1))))
+        (format "%s %s*" name-but-last suffix))
+    (format "%s %s" name suffix)))
+
 (cl-defun eshell-session:buffer-exists (bufname)
   (cl-find-if (lambda (buf)
                 (cl-equalp (buffer-name buf) bufname))
@@ -19,44 +25,46 @@
 
 (cl-defun eshell-session:buffer-name-next (name)
   (cond
-   ((not name)
-    eshell-session:buffer-name)
-   ((eshell-session:default-buffer-name-p name)
-    (cl-concatenate 'string
-                    eshell-session:buffer-name "<1>"))
-   (t
-    (cl-letf* ((num-char (eshell-session:buffer-number name))
-               (next-num-char (number-to-string (+ 1 (string-to-int num-char)))))
-      (format "%s<%s>" eshell-session:buffer-name
-              next-num-char)))))
+    ((not name)
+     eshell-session:buffer-name)
+    ((eshell-session:default-buffer-name-p name)
+     (eshell-session:make-buffer-name eshell-session:buffer-name
+                                      "<1>"))
+    (t
+     (cl-letf* ((num-char (eshell-session:buffer-number name))
+                (next-num-char (number-to-string (+ 1 (string-to-int num-char))))
+                (suffix (cl-concatenate 'string
+                                        "<" next-num-char ">")))
+       (eshell-session:make-buffer-name eshell-session:buffer-name
+                                        suffix)))))
 
 (cl-defun eshell-session:buffer-name-prev (name)
   (cond
-   ((not name)
-    eshell-session:buffer-name)
-   ((eshell-session:default-buffer-name-p name)
-    (eshell-session:buffer-last))
-   (t
-    (cl-letf ((num-char (eshell-session:buffer-number name)))
-      (if (cl-equalp num-char "1")
-          eshell-session:buffer-name
-        (cl-letf ((prev-num-char (number-to-string (- (string-to-int num-char) 1))))
-          (format "%s<%s>" eshell-session:buffer-name prev-num-char)))))))
+    ((not name)
+     eshell-session:buffer-name)
+    ((eshell-session:default-buffer-name-p name)
+     (eshell-session:buffer-last))
+    (t
+     (cl-letf ((num-char (eshell-session:buffer-number name)))
+       (if (cl-equalp num-char "1")
+           eshell-session:buffer-name
+         (cl-letf ((prev-num-char (number-to-string (- (string-to-int num-char) 1))))
+           (format "%s<%s>" eshell-session:buffer-name prev-num-char)))))))
 
 (cl-defun eshell-session:find-next (name)
   (cond
-   ((cl-find (eshell-session:buffer-name-next name) eshell-session:session-list)
-    (eshell-session:buffer-name-next name))
-   (t
-    eshell-session:buffer-name)))
+    ((cl-find (eshell-session:buffer-name-next name) eshell-session:session-list)
+     (eshell-session:buffer-name-next name))
+    (t
+     eshell-session:buffer-name)))
 
 (cl-defun eshell-session:buffer-number (name)
   (cond ((eshell-session:default-buffer-name-p name)
          0)
         (t
          (save-match-data
-           (string-match "[0-9]+" name)
-           (match-string  0 name)))))
+           (string-match "<\\([0-9]+\\)>" name)
+           (match-string 1 name)))))
 
 (cl-defun eshell-session:buffer-last ()
   (cl-nth-value (- (length eshell-session:session-list) 1)
@@ -68,6 +76,33 @@
           (cl-remove buf eshell-session:session-list :test 'equal))))
 (add-hook 'eshell-exit-hook
           'eshell-session:exit-hook)
+
+
+(defun eshell-session:eshell (&optional arg)
+  "Create an interactive Eshell buffer.
+The buffer used for Eshell sessions is determined by the value of
+`eshell-buffer-name'.  If there is already an Eshell session active in
+that buffer, Emacs will simply switch to it.  Otherwise, a new session
+will begin.  A numeric prefix arg (as in `C-u 42 M-x eshell RET')
+switches to the session with that number, creating it if necessary.  A
+nonnumeric prefix arg means to create a new session.  Returns the
+buffer selected (or created)."
+  (interactive "P")
+  (cl-assert eshell-buffer-name)
+  (let ((buf (cond ((numberp arg)
+                    (get-buffer-create
+                     (eshell-session:make-buffer-name eshell-session:buffer-name
+                                                      (cl-concatenate 'string
+                                                                      "<" (number-to-string arg) ">"))))
+                   (arg
+                    (generate-new-buffer eshell-session:buffer-name))
+                   (t
+                    (get-buffer-create eshell-session:buffer-name)))))
+    (cl-assert (and buf (buffer-live-p buf)))
+    (pop-to-buffer-same-window buf)
+    (unless (derived-mode-p 'eshell-mode)
+      (eshell-mode))
+    buf))
 
 ;;;; command
 
@@ -116,7 +151,7 @@
            (setq eshell-session:session-list
                  (cl-concatenate 'list
                                  eshell-session:session-list (list next)))
-           (eshell num)))))
+           (eshell-session:eshell num)))))
 
 ;;; provide
 (provide 'eshell-session)
