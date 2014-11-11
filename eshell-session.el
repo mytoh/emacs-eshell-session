@@ -72,8 +72,10 @@
      (cl-letf ((num-char (eshell-session:buffer-number name)))
        (if (cl-equalp num-char "1")
            eshell-session:buffer-name
-         (cl-letf ((prev-num-char (number-to-string (- (string-to-number num-char) 1))))
-           (format "%s<%s>" eshell-session:buffer-name prev-num-char)))))))
+         (cl-letf* ((prev-num-char (number-to-string (- (string-to-number num-char) 1)))
+                    (suffix (cl-concatenate 'string "<" prev-num-char ">")))
+           (eshell-session:make-buffer-name eshell-session:buffer-name
+                                            suffix)))))))
 
 (cl-defun eshell-session:find-next (name)
   (cond
