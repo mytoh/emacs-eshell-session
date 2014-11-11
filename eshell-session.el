@@ -30,8 +30,6 @@
   "default basename for buffer name"
   :group 'eshell)
 
-;;;; funcs
-
 (cl-defun eshell-session:default-buffer-name-p (name)
   (cl-equalp eshell-session:buffer-name name))
 
@@ -122,8 +120,6 @@
       (eshell-mode))
     buf))
 
-;;;; command
-
 ;;; switch to eshell or restore previous windows
 ;;; http://irreal.org/blog/?p=1742
 (cl-defun eshell-session:switch ()
@@ -171,7 +167,6 @@
                                  eshell-session:session-list (list next)))
            (eshell-session:eshell num)))))
 
-;;; provide
 (provide 'eshell-session)
 
 ;;; eshell-session.el ends here
