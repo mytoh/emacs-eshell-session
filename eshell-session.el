@@ -1,11 +1,31 @@
-;;; eshell-session.el -*- lexical-binding: t -*-
+;;; eshell-session.el --- Switch eshell buffers -*- lexical-binding: t -*-
+
+;; Package-Requires ((emacs "24.4"))
+
+;;; Commentary:
+
+;; example configuration
+;;
+;; (require 'eshell-session)
+;;
+;; (define-key global-map (kbd "C-z") (make-sparse-keymap))
+;; (define-key global-map (kbd "C-z C-z") 'eshell-session:switch)
+;; (defun my-eshell-mode-hook ()
+;;   (define-key eshell-mode-map (kbd "C-z C-n") 'eshell-session:next)
+;;   (define-key eshell-mode-map (kbd "C-z C-p") 'eshell-session:prev)
+;;   (define-key eshell-mode-map (kbd "C-z C-c") 'eshell-session:new))
+;; (add-hook 'eshell-mode-hook 'my-eshell-mode-hook)
+
+;;; Code:
 
 (require 'cl-lib)
 (require 'subr-x)
 
 (defvar eshell-session:session-list nil)
+
 (defcustom eshell-session:buffer-name eshell-buffer-name
-  "default basename for buffer name")
+  "default basename for buffer name"
+  :group 'eshell)
 
 ;;;; funcs
 
@@ -159,7 +179,4 @@ buffer selected (or created)."
 ;;; provide
 (provide 'eshell-session)
 
-;; Local Variables:
-;; coding: utf-8
-;; indent-tabs-mode: nil
-;; End:
+;;; eshell-session.el ends here
