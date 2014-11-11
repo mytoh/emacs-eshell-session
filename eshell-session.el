@@ -1,5 +1,7 @@
 ;;; eshell-session.el --- Switch eshell buffers -*- lexical-binding: t -*-
 
+;; Author: mytoh
+;; URL: https://github.com/mytoh/emacs-eshell-session
 ;; Package-Requires ((emacs "24.4"))
 
 ;;; Commentary:
