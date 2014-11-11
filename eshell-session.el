@@ -22,6 +22,7 @@
 
 (require 'cl-lib)
 (require 'subr-x)
+(require 'eshell)
 
 (defvar eshell-session:session-list nil)
 
