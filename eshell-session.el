@@ -56,7 +56,7 @@
                                       "<1>"))
     (t
      (cl-letf* ((num-char (eshell-session:buffer-number name))
-                (next-num-char (number-to-string (+ 1 (string-to-int num-char))))
+                (next-num-char (number-to-string (+ 1 (string-to-number num-char))))
                 (suffix (cl-concatenate 'string
                                         "<" next-num-char ">")))
        (eshell-session:make-buffer-name eshell-session:buffer-name
@@ -72,7 +72,7 @@
      (cl-letf ((num-char (eshell-session:buffer-number name)))
        (if (cl-equalp num-char "1")
            eshell-session:buffer-name
-         (cl-letf ((prev-num-char (number-to-string (- (string-to-int num-char) 1))))
+         (cl-letf ((prev-num-char (number-to-string (- (string-to-number num-char) 1))))
            (format "%s<%s>" eshell-session:buffer-name prev-num-char)))))))
 
 (cl-defun eshell-session:find-next (name)
@@ -160,8 +160,8 @@
         (t
          (cl-letf* ((next (eshell-session:buffer-name-next
                            (eshell-session:buffer-last)))
-                    (num (string-to-int (eshell-session:buffer-number
-                                         next))))
+                    (num (string-to-number (eshell-session:buffer-number
+                                            next))))
            (setq eshell-session:session-list
                  (cl-concatenate 'list
                                  eshell-session:session-list (list next)))
