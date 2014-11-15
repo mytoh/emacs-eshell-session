@@ -124,6 +124,7 @@
 
 ;;; switch to eshell or restore previous windows
 ;;; http://irreal.org/blog/?p=1742
+;;;###autoload
 (cl-defun eshell-session:switch ()
   "Bring up a full-screen eshell or restore previous config."
   (interactive)
@@ -136,6 +137,7 @@
     (eshell)
     (delete-other-windows)))
 
+;;;###autoload
 (cl-defun eshell-session:next ()
   "jump to next eshell buffer"
   (interactive)
@@ -146,6 +148,7 @@
           (switch-to-buffer eshell-session:buffer-name)))
     (message "Not eshell buffer")))
 
+;;;###autoload
 (cl-defun eshell-session:prev ()
   (interactive)
   (if (eshell-session:mode-p major-mode)
@@ -155,6 +158,7 @@
           (switch-to-buffer eshell-session:buffer-name)))
     (message "not eshell buffer")))
 
+;;;###autoload
 (cl-defun eshell-session:new ()
   (interactive)
   (cond ((not eshell-session:session-list)
