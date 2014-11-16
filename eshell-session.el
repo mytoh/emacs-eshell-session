@@ -13,9 +13,9 @@
 ;; (define-key global-map (kbd "C-z") (make-sparse-keymap))
 ;; (define-key global-map (kbd "C-z C-z") 'eshell-session:switch)
 ;; (defun my-eshell-mode-hook ()
-;;   (define-key eshell-mode-map (kbd "C-z C-n") 'eshell-session:next)
-;;   (define-key eshell-mode-map (kbd "C-z C-p") 'eshell-session:prev)
-;;   (define-key eshell-mode-map (kbd "C-z C-c") 'eshell-session:new))
+;;   (define-key eshell-mode-map (kbd "C-z C-n") 'eshell-session:buffer-next)
+;;   (define-key eshell-mode-map (kbd "C-z C-p") 'eshell-session:buffer-prev)
+;;   (define-key eshell-mode-map (kbd "C-z C-c") 'eshell-session:buffer-new))
 ;; (add-hook 'eshell-mode-hook 'my-eshell-mode-hook)
 
 ;;; Code:
@@ -138,7 +138,7 @@
     (delete-other-windows)))
 
 ;;;###autoload
-(cl-defun eshell-session:next ()
+(cl-defun eshell-session:buffer-next ()
   "jump to next eshell buffer"
   (interactive)
   (if (eshell-session:mode-p major-mode)
@@ -149,7 +149,7 @@
     (message "Not eshell buffer")))
 
 ;;;###autoload
-(cl-defun eshell-session:prev ()
+(cl-defun eshell-session:buffer-prev ()
   (interactive)
   (if (eshell-session:mode-p major-mode)
       (cl-letf ((prev (eshell-session:buffer-name-prev (buffer-name (current-buffer)))))
@@ -159,7 +159,7 @@
     (message "not eshell buffer")))
 
 ;;;###autoload
-(cl-defun eshell-session:new ()
+(cl-defun eshell-session:buffer-new ()
   (interactive)
   (cond ((not eshell-session:session-list)
          (eshell-session:switch))
